@@ -2,7 +2,17 @@
 #define DETECTION_H
 
 #include <Arduino.h>
+#include "GameSequence.h"
+
+typedef struct Tiles {
+  int tileNum;
+  int holdDurForward;
+  int holdDurBackward;
+} Tiles;
+
+extern Tiles tiles[13];
 
 void detection_ready(bool &shinyFound);
+void returnToEcruteak();
 
 #endif

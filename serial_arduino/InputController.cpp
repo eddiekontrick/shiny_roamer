@@ -12,8 +12,8 @@ const int buttonLeftPin = 8;
 const int buttonRightPin = 9;
 const int buttonUpPin = 10;
 const int buttonDownPin = 11;
-const int buttonXPin = 7;
-const int buttonYPin = 6;
+const int buttonYPin = 7;
+const int buttonXPin = 6;
 
 void initButtons() {
     pinMode(buttonAPin, OUTPUT);      digitalWrite(buttonAPin, HIGH);

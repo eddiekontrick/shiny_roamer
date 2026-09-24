@@ -4,6 +4,7 @@
 #include <Arduino.h>
 #include "InputController.h"
 
+
 void black2_title_sequence();
 void black2_encounter_sequence();
 void platinum_title_sequence();
@@ -13,5 +14,12 @@ void frlgStarterSequence();
 void encounter_giratina();
 void diamond_title_sequence();
 void enter_cavern();
+
+void mount_bike();
+void reset_route_hgss();
+void roamer_cutscene();
+void use_escape_rope();
+void bike_to_route();
+void use_repel_hgss();
 
 #endif
