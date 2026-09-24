@@ -17,6 +17,21 @@ add_custom_command(TARGET cppShinyRoamer POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
         ${CMAKE_SOURCE_DIR}/tree_reference.png
         $<TARGET_FILE_DIR:cppShinyRoamer>
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        ${CMAKE_SOURCE_DIR}/roamer_reference.png
+        $<TARGET_FILE_DIR:cppShinyRoamer>
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        ${CMAKE_SOURCE_DIR}/raikou_normal.png
+        $<TARGET_FILE_DIR:cppShinyRoamer>
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        ${CMAKE_SOURCE_DIR}/raikou_shiny.png
+        $<TARGET_FILE_DIR:cppShinyRoamer>
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        ${CMAKE_SOURCE_DIR}/entei_normal.png
+        $<TARGET_FILE_DIR:cppShinyRoamer>
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        ${CMAKE_SOURCE_DIR}/entei_shiny.png
+        $<TARGET_FILE_DIR:cppShinyRoamer>
 )
 
 target_include_directories(cppShinyRoamer PRIVATE 
@@ -27,5 +42,3 @@ target_include_directories(cppShinyRoamer PRIVATE
 )
 
 target_link_libraries(cppShinyRoamer PRIVATE ${OpenCV_LIBS})
-
-
