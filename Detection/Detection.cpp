@@ -6,7 +6,12 @@
 namespace Detection{
 
 namespace {
-cv::Mat reference;
+cv::Mat tree_reference;
+cv::Mat roamer_reference;
+cv::Mat raikou_normal;
+cv::Mat raikou_shiny;
+cv::Mat entei_normal;
+cv::Mat entei_shiny;
 
 std::filesystem::path GetExecutableDirectory() {
     std::wstring buffer(MAX_PATH, L'\0');
@@ -28,11 +33,25 @@ std::filesystem::path GetExecutableDirectory() {
 }
 
 bool Initialize() {
-    const auto referencePath = GetExecutableDirectory() / "tree_reference.png";
-    reference = cv::imread(referencePath.string(), cv::IMREAD_GRAYSCALE);
-    if (reference.empty()) {
-        std::cerr << "Could not load tree reference image: "
-                  << referencePath.string() << std::endl;
+    const auto imageDirectory = GetExecutableDirectory();
+    const auto loadImage = [&imageDirectory](cv::Mat& image,
+                                             const std::string& filename) {
+        const auto imagePath = imageDirectory / filename;
+        image = cv::imread(imagePath.string(), cv::IMREAD_GRAYSCALE);
+        if (image.empty()) {
+            std::cerr << "Could not load image: " << imagePath.string()
+                      << std::endl;
+            return false;
+        }
+        return true;
+    };
+
+    if (!loadImage(tree_reference, "tree_reference.png") ||
+        !loadImage(roamer_reference, "roamer_reference.png") ||
+        !loadImage(raikou_normal, "raikou_normal.png") ||
+        !loadImage(raikou_shiny, "raikou_shiny.png") ||
+        !loadImage(entei_normal, "entei_normal.png") ||
+        !loadImage(entei_shiny, "entei_shiny.png")) {
         return false;
     }
 
@@ -55,7 +74,7 @@ bool DetectShiny(cv::Mat img, cv::Rect roiRect, cv::Vec3i normalColor, int toler
         std::abs(roiAvg[2] - normalColor[2])
     );
 
-    std::cout << "Color detected: " << roiAvg << "\nDifference from shiny: " << diff << std::endl;
+    std::cout << "Color detected: " << roiAvg << "\nDifference from normal: " << diff << std::endl;
 
     cv::rectangle(img, roiRect, cv::Scalar(0,255,0), 1);
     cv::imshow("Detection window", img);
@@ -135,7 +154,7 @@ int getDistanceFromEcruteak(cv::Mat img){
 
     // begin template matching 
     cv::Mat result;
-    cv::matchTemplate(thresholded, reference, result, cv::TM_CCOEFF_NORMED);
+    cv::matchTemplate(thresholded, tree_reference, result, cv::TM_CCOEFF_NORMED);
 
     // Localize best match coordinates
     double minVal; double maxVal;
@@ -144,7 +163,7 @@ int getDistanceFromEcruteak(cv::Mat img){
 
     cv::Point matchLoc = maxLoc;
 
-    cv::Point bottomRight(matchLoc.x + reference.cols, matchLoc.y + reference.rows);
+    cv::Point bottomRight(matchLoc.x + tree_reference.cols, matchLoc.y + tree_reference.rows);
     cv::rectangle(thresholded, matchLoc, bottomRight, cv::Scalar(0, 255, 0), 2);
     cv::imshow("BINARY", thresholded); 
 
@@ -192,6 +211,80 @@ std::string getReturnToEcruteakMessage(cv::Mat img){
     std::string direction = Detection::getFacingDirection(img) ? "BACKWARD" : "FORWARD";
 
     return direction + "_" + std::to_string(tile);
+}
+
+// make sure to remember to pass image 
+ROAMER identifyRoamer(cv::Mat img){
+    // Threshold the template
+    cv::Mat gray_ref;
+    if (roamer_reference.channels() == 1) {
+        gray_ref = roamer_reference;
+    } else if (roamer_reference.channels() == 3) {
+        cv::cvtColor(roamer_reference, gray_ref, cv::COLOR_BGR2GRAY);
+    } else if (roamer_reference.channels() == 4) {
+        cv::cvtColor(roamer_reference, gray_ref, cv::COLOR_BGRA2GRAY);
+    } else {
+        std::cerr << "Unsupported roamer reference channel count: "
+                  << roamer_reference.channels() << std::endl;
+        return ROAMER_ERROR;
+    }
+
+    cv::Mat thresh_roamer_ref;
+    cv::threshold(gray_ref, thresh_roamer_ref, 110, 255, cv::THRESH_BINARY);
+
+    // Threshold the passed image
+    cv::Mat gray_img;
+    if (img.channels() == 1) {
+        gray_img = img;
+    } else if (img.channels() == 3) {
+        cv::cvtColor(img, gray_img, cv::COLOR_BGR2GRAY);
+    } else if (img.channels() == 4) {
+        cv::cvtColor(img, gray_img, cv::COLOR_BGRA2GRAY);
+    } else {
+        std::cerr << "Unsupported input image channel count: "
+                  << img.channels() << std::endl;
+        return ROAMER_ERROR;
+    }
+
+    cv::Mat thresh_img;
+    cv::threshold(gray_img, thresh_img, 100, 255, cv::THRESH_BINARY);
+
+    cv::Mat result;
+    cv::matchTemplate(thresh_img, thresh_roamer_ref, result, cv::TM_CCOEFF_NORMED);
+
+    double minVal; double maxVal;
+    cv::Point minLoc; cv::Point maxLoc;
+    cv::minMaxLoc(result, &minVal, &maxVal, &minLoc, &maxLoc, cv::Mat());
+
+    cv::Point matchLoc = maxLoc;
+    cv::Point bottomRight(matchLoc.x + roamer_reference.cols, matchLoc.y + roamer_reference.rows);
+    
+    cv::rectangle(thresh_img, matchLoc, bottomRight, cv::Scalar(0, 255, 0), 2);
+    cv::imshow("BINARY", thresh_img); 
+
+    const double matchThreshold = 0.7;
+
+    std::string message = maxVal > matchThreshold ? "Raikou Detected." : "Entei Detected";
+    std::cout << message << std::endl;
+    return maxVal > matchThreshold ? RAIKOU : ENTEI;
+}
+
+bool DetectShinyRoamer(ROAMER roamer, cv::Mat img){
+    switch(roamer){
+        case(RAIKOU): {
+            cv::Rect raikouRoi(193, 33, 4, 4);
+            cv::Vec3i raikouNormalColor(142, 101, 174);
+            return DetectShiny(img, raikouRoi, raikouNormalColor, 5);
+        } case(ENTEI): {
+            cv::Rect enteiRoi(179, 40, 2, 2);
+            cv::Vec3i enteiNormalColor(0, 0, 219);
+            return DetectShiny(img, enteiRoi, enteiNormalColor, 5);
+        } case(ROAMER_ERROR):
+            std::cout << "Roamer error!" << std::endl;
+            return false;
+        default:
+            return false;
+    }
 }
 
 }
