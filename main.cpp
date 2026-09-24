@@ -30,6 +30,17 @@ int main(){
 
     while (true){
         WindowHandler::GetWindow(hwnd, img);
+        Detection::ROAMER currRoamer = Detection::identifyRoamer(img);
+        bool isShiny = Detection::DetectShinyRoamer(currRoamer, img);
+
+        std::string msg = isShiny ? "Shiny!" : "Not shiny.";
+
+        std::cout << msg << std::endl;
+        if (cv::waitKey(1) == 'q') {  // 27 = Esc key, gives you a clean exit
+            break;
+        }
+        /*
+        
         std::string command;
         if (serialConnected){
             if (!SerialHandler::ReadSerialLine(serialHandle, command)){
@@ -68,12 +79,12 @@ int main(){
                 break;
             case Detection::EVENTS::NO_ACTION:
                 break;
-        }*/
+        }
 
         if (cv::waitKey(1) == 'q') {  // 27 = Esc key, gives you a clean exit
             break;
         }
-
+        */
     }
 
 }

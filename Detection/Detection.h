@@ -14,6 +14,12 @@ enum EVENTS {
     ENCOUNTER
 };
 
+enum ROAMER {
+    ROAMER_ERROR,
+    RAIKOU,
+    ENTEI
+};
+
 inline const std::unordered_map<int, int> tiles = {
     {0, 0},
     {13, 1},
@@ -36,5 +42,7 @@ bool DetectShiny(cv::Mat img, cv::Rect roi, cv::Vec3i normalColor, int tolerance
 Detection::EVENTS DetectInterrupt(cv::Mat img);
 bool getFacingDirection(cv::Mat img);
 std::string getReturnToEcruteakMessage(cv::Mat img);
+ROAMER identifyRoamer(cv::Mat img);
+bool DetectShinyRoamer(ROAMER roamer, cv::Mat img);
 
 }
