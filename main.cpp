@@ -32,13 +32,6 @@ int main(){
 
     while (true){
         WindowHandler::GetWindow(hwnd, img);
-
-  
-        int distance = Detection::getDistanceFromEcruteak(img);
-        std::cout << distance << std::endl;
-
-          
-        /*
         // GET THE COMMAND FIRST
         std::string command = "INTERRUPT";
         if (SerialHandler::MatchCommand(command, serialConnected, serialHandle)){
@@ -85,7 +78,6 @@ int main(){
             case Detection::EVENTS::NO_ACTION:
                 break;
         }
-         */
 
         if (cv::waitKey(1) == 'q') {  // 27 = Esc key, gives you a clean exit
             break;

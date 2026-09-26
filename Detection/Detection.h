@@ -44,5 +44,6 @@ bool getFacingDirection(cv::Mat img);
 std::string getReturnToEcruteakMessage(cv::Mat img);
 ROAMER identifyRoamer(cv::Mat img);
 bool DetectShinyRoamer(ROAMER roamer, cv::Mat img);
+bool FindTileWithPadding(int distance, int padding, int& outTile);
 
 }

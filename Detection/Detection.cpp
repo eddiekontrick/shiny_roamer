@@ -173,14 +173,16 @@ int getDistanceFromEcruteak(cv::Mat img){
 
     // formula for telling distance from gate (to reset route)
     int distance = 90 - bottomRight.y + 58;
-    auto it = tiles.find(distance);
     std::cout << "Distance: " << distance << std::endl;
-    if (it != tiles.end())
-        std::cout << "In tile: " << it->second << std::endl;
-    else
-        std::cout << "value not found " << std::endl;
 
-    return it->second;
+    int tile = -1;
+    if (FindTileWithPadding(distance, 3, tile)) {
+        std::cout << "In tile: " << tile << std::endl;
+    } else {
+        std::cout << "value not found" << std::endl;
+    }
+
+    return tile;
 }
 
 bool getFacingDirection(cv::Mat img){
@@ -289,6 +291,23 @@ bool DetectShinyRoamer(ROAMER roamer, cv::Mat img){
         default:
             return false;
     }
+}
+
+// Looks up `distance` in `tiles`, tolerating +/- padding pixels of drift.
+// Returns true and sets outTile to the matched tile if found.
+bool FindTileWithPadding(int distance, int padding, int& outTile) {
+    int bestOffset = padding + 1; // sentinel: worse than any valid match
+    bool found = false;
+
+    for (int offset = -padding; offset <= padding; ++offset) {
+        auto it = tiles.find(distance + offset);
+        if (it != tiles.end() && std::abs(offset) < bestOffset) {
+            bestOffset = std::abs(offset);
+            outTile = it->second;
+            found = true;
+        }
+    }
+    return found;
 }
 
 }
