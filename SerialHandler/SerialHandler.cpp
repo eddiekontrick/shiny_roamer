@@ -109,23 +109,18 @@ bool WriteSerialChar(HANDLE serialHandle, char ch){
 
 bool MatchCommand(const std::string& expected, bool serialConnected, HANDLE serialHandle){
     std::string message;
-    if (serialConnected){
-        if (!SerialHandler::ReadSerialLine(serialHandle, message)){
-            std::cout << "No message" << std::endl;
-            return false;
-        }
-
-        std::string clean = message;
-        // trim leading and trailing whitespace
-        clean.erase(clean.begin(), std::find_if(clean.begin(), clean.end(), [&](unsigned char ch) { return !std::isspace(ch); }));
-        clean.erase(std::find_if(clean.rbegin(), clean.rend(), [&](unsigned char ch) { return !std::isspace(ch); }).base(), clean.end());
-
-        std::cout << "Received: " << clean << "Expected command: " << expected << std::endl;
-        if (clean == expected) {
-            return true;
-        }
+    if (!serialConnected) return false;
+    if (!SerialHandler::ReadSerialLine(serialHandle, message)){
+        std::cout << "No message\n";
+        return false;
     }
-    return false;
+
+    std::string clean = message;
+    clean.erase(clean.begin(), std::find_if(clean.begin(), clean.end(), [](unsigned char ch) { return !std::isspace(ch); }));
+    clean.erase(std::find_if(clean.rbegin(), clean.rend(), [](unsigned char ch) { return !std::isspace(ch); }).base(), clean.end());
+
+    std::cout << "Received: " << clean << std::endl;
+    return clean == expected;
 }
 
 }

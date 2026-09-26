@@ -128,6 +128,8 @@ Detection::EVENTS DetectInterrupt(cv::Mat img){
     cv::imshow("Detect Interrupt", img);
 
     if (repelDiff[0] == 0 && repelDiff[1] == 0 && repelDiff[2] == 0){
+        std::cout << "Repel interrupt detected, Repel diffs"
+            << repelDiff[0] << repelDiff[1] << repelDiff[2];
         return Detection::EVENTS::REPEL;
     }
 
@@ -142,6 +144,8 @@ int getDistanceFromEcruteak(cv::Mat img){
     // Partition out the other trees on the right side of the screen:
     // we are using the treeline on the left as a reference to where we
     // are in relation to the gate
+    int distThreshold = 5;
+
     cv::Rect thresholdRoi(0, 0, 150, 200);
     cv::Mat imgPartition = img(thresholdRoi);
 

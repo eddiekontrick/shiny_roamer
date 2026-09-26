@@ -49,7 +49,7 @@ void loop() {
   bool raikouSeen = false;
   bool enteiSeen = false;
 
-  roamer_setup_sequence();
+  // roamer_setup_sequence();
 
   // Enter interrupt detection mode
   Serial.println("INTERRUPT");
@@ -62,33 +62,27 @@ void loop() {
       // This won't work because it needs to go back to route_reset_walk instead of rest
       // They must be in the same while loop
       if (message == "REPEL"){
-      repelCount++
-      if (repelCount >= 25){
-        break;
-      }
-      pressB(100);
-      delay(300);
-      use_repel_hgss();
-      returnToEcruteak();
-  }/*
-    else if (message == "ENCOUNTER"){
-      // find the correct time to delay so that 
-      // no matter how long we have to wait for the last reset 
-      // route iteration, we still observe the same pixels
-      // placeholder:
-      delay(5000);
-      Serial.println("START_DETECTION");
-    }*/
-    route_reset_walk();
-  }
-
-  }
-  if (shinyFound){
-    while(true){
-
+        repelCount++;
+        if (repelCount >= 25){
+          break;
+        }
+        pressB(100);
+        delay(300);
+        use_repel_hgss();
+        returnToEcruteak();
+        Serial.println("RESTART_INTERRUPT");
+      }/*
+      else if (message == "ENCOUNTER"){
+        // find the correct time to delay so that 
+        // no matter how long we have to wait for the last reset 
+        // route iteration, we still observe the same pixels
+        // placeholder:
+        delay(5000);
+        Serial.println("START_DETECTION");
+      }*/
+      
     }
-  } else if (!shinyFound){
-    pressResetDS(200);
+    route_reset_walk();
   }
 }
   /*
