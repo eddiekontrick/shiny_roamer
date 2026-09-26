@@ -14,4 +14,6 @@ bool ReadSerialLine(HANDLE serialHandle, std::string& line);
 
 bool WriteSerialChar(HANDLE serialHandle, char ch);
 
+bool MatchCommand(const std::string& expected, bool serialConnected, HANDLE serialHandle);
+
 }

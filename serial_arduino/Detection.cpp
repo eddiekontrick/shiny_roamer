@@ -45,8 +45,9 @@ void detection_ready(bool &shinyFound) {
 }
 
 void returnToEcruteak(){
+  Serial.println("GET_DIST");
   unsigned long startTime = millis();
-  const unsigned long responseTimeout = 500; // adjust based on how long PC processing takes
+  const unsigned long responseTimeout = 1500; // adjust based on how long PC processing takes
 
   while (millis() - startTime < responseTimeout) {
     if (Serial.available() > 0) {
@@ -72,8 +73,6 @@ void returnToEcruteak(){
       }
       delay(200);
       pressDown(50);
-      delay(200);
-      mount_bike();
       break; // got and handled the response, stop waiting
     }
   }

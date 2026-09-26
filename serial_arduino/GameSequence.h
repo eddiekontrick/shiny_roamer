@@ -15,11 +15,13 @@ void encounter_giratina();
 void diamond_title_sequence();
 void enter_cavern();
 
+void hgss_title_sequence();
 void mount_bike();
-void reset_route_hgss();
 void roamer_cutscene();
 void use_escape_rope();
 void bike_to_route();
 void use_repel_hgss();
+void roamer_setup_sequence();
+void route_reset_walk();
 
 #endif

@@ -181,7 +181,7 @@ int getDistanceFromEcruteak(cv::Mat img){
 
 bool getFacingDirection(cv::Mat img){
     int tolerance = 30;
-    cv::Rect roi(128, 89, 1, 1);
+    cv::Rect roi(126, 85, 1, 1);
     cv::Mat dirRoi = img(roi);
     cv::Scalar roiMean = cv::mean(dirRoi);
 
@@ -191,16 +191,16 @@ bool getFacingDirection(cv::Mat img){
         static_cast<int>(roiMean[2])
     );
 
-    cv::Vec3i forwardColor(190, 207, 239);
+    cv::Vec3i forwardColor(32, 113, 178);
 
     cv::Vec3i dirResult(
         cv::abs(roiColor[0] - forwardColor[0]),
         cv::abs(roiColor[1] - forwardColor[1]),
         cv::abs(roiColor[2] - forwardColor[2])
     );
-
+    std::cout << "Current color: " << roiColor << std::endl;
     std::cout << dirResult << std::endl;
-    cv::rectangle(img, roi, (0, 0, 0, 0), 4);
+    cv::rectangle(img, roi, (255, 255, 255, 0), 1);
     cv::imshow("Get Facing Direction", img);
 
     return dirResult[0] < tolerance || dirResult[1] < tolerance || dirResult[2] < tolerance;

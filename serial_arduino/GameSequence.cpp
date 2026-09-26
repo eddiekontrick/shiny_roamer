@@ -107,6 +107,12 @@ void encounter_giratina() {
     delay(479); pressA(123);
 }
 
+void hgss_title_sequence(){
+    delay(8800); pressA(78); 
+    delay(1772); pressA(122); 
+    delay(3207); pressA(59); 
+}
+
 void enter_cavern() {
     delay(171); pressUp(747);
     delay(1024); pressLeft(1071);
@@ -122,14 +128,17 @@ void mount_bike(){
     pressY(200);
 }
 
-void reset_route_hgss(){
-    pressDown(1100);
-    pressUp(1100);
+void route_reset_walk(){
+    pressDown(1650);
+    pressUp(1700);
+    delay(400);
+    pressDown(50);
+    delay(200);
 }
 
 void roamer_cutscene(){
-    delay(2880); pressLeft(125);
-    delay(15173); pressB(109);
+    delay(2800); pressLeft(125); 
+    delay(14900); pressB(109); 
     delay(1303); pressB(77);
     delay(1345); pressB(108);
     delay(877); pressB(92);
@@ -138,27 +147,31 @@ void roamer_cutscene(){
     delay(1343); pressB(124);
     delay(880); pressB(93);
     delay(1237); pressB(123);
-    delay(883); pressB(78);
+    delay(883); pressB(78); 
+    delay(2000); 
 }
 
 void use_escape_rope() {
-    delay(200); pressX(93);
+    delay(200); pressX(93); 
     delay(449); pressUp(123);
     delay(234); pressUp(92);
-    delay(860); pressA(61);
+    delay(500); pressA(61); 
     delay(1554); pressA(124);
-    delay(866); pressA(92);
+    delay(866); pressA(92); 
 }
 
 void bike_to_route() {
+    mount_bike(); Serial.print("Mount bike");
+    delay(200); pressDown(700);
+    delay(0); pressRight(980);
+    delay(0); pressDown(2160);
+    delay(1000);
     mount_bike();
-    delay(200); pressDown(820);
-    delay(0); pressRight(1170);
-    delay(0); pressDown(2261);
+    delay(300);
 }
 
 void use_repel_hgss() {
-    delay(2256); pressX(105);
+    delay(0); pressX(105);
     delay(402); pressA(154);
     delay(1381); pressA(138);
     delay(497); pressA(47);
@@ -167,4 +180,11 @@ void use_repel_hgss() {
     delay(2163); pressB(139);
 }
 
+void roamer_setup_sequence(){
+    hgss_title_sequence();
+    roamer_cutscene(); 
+    use_escape_rope();
+    delay(12000); 
+    bike_to_route();
+}
 
