@@ -44,9 +44,7 @@ int main(){
         switch(Detection::DetectInterrupt(img)) {
             case Detection::EVENTS::REPEL:
                 // Send repel message to arduino
-                std::cout << "in repel switch case block\n";
                 if (serialConnected){
-                    std::cout << "in serial connected block\n";
                     const std::string response = "REPEL\n";
                     DWORD written = 0;
                     WriteFile(serialHandle, response.c_str(), static_cast<DWORD>(response.size()), &written, nullptr);
@@ -74,6 +72,32 @@ int main(){
                 break;
             case Detection::EVENTS::ENCOUNTER:
                 std::cout << "Encounter Starting! " << std::endl;
+
+                if (serialConnected){
+                    const std::string response = "ENCOUNTER\n";
+                    DWORD written = 0;
+                    WriteFile(serialHandle, response.c_str(), static_cast<DWORD>(response.size()), &written, nullptr);
+                    std::cout << "Sent reapply repel message, waiting on response." << std::endl;
+
+                    // wait for command to start detection
+                    std::string detectReady = "START_DETECTION";
+
+                    // First - Get the roamer and store it's name
+                    Detection::ROAMER currRoamer = Detection::identifyRoamer(img);
+                    std::string currRoamerName = currRoamer == Detection::ROAMER::RAIKOU ? "RAIKOU" : currRoamer == Detection::ROAMER::ENTEI ? "ENTEI" : "ROAMER_ERROR";
+                    
+                    // Second - Decide if it is shiny
+                    bool isShiny = Detection::DetectShinyRoamer(currRoamer, img);
+                    std::string shinyStatus = isShiny ? "SHINY\n" : "NORMAL\n";
+
+
+                    const std::string decision = currRoamerName + "_" + shinyStatus;
+                    DWORD written = 0;
+                    WriteFile(serialHandle, decision.c_str(), static_cast<DWORD>(response.size()), &written, nullptr);
+                    std::cout << "Sent reapply repel message, waiting on response." << std::endl;
+
+                }
+
                 break;
             case Detection::EVENTS::NO_ACTION:
                 break;
@@ -87,11 +111,4 @@ int main(){
 
 }
 
-/*
-Detection::ROAMER currRoamer = Detection::identifyRoamer(img);
-bool isShiny = Detection::DetectShinyRoamer(currRoamer, img);
 
-std::string msg = isShiny ? "Shiny!" : "Not shiny.";
-
-std::cout << msg << std::endl;
-*/

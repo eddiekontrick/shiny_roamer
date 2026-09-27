@@ -64,6 +64,7 @@ void loop() {
       if (message == "REPEL"){
         repelCount++;
         if (repelCount >= 25){
+          Serial.println("END_INTERRUPT");
           break;
         }
         pressB(100);
@@ -71,7 +72,7 @@ void loop() {
         use_repel_hgss();
         returnToEcruteak();
         Serial.println("RESTART_INTERRUPT");
-      }/*
+      }
       else if (message == "ENCOUNTER"){
         // find the correct time to delay so that 
         // no matter how long we have to wait for the last reset 
@@ -79,7 +80,22 @@ void loop() {
         // placeholder:
         delay(5000);
         Serial.println("START_DETECTION");
-      }*/
+        roamer_detection(shinyFound, enteiSeen, raikouSeen);
+
+        if (!shinyFound && (enteiSeen && raikouSeen)) pressResetDS(100);
+
+        if (!shinyFound && (!enteiSeen || !raikouSeen)){
+          // implement use attack to knock out current roamer
+          // knock_out_roamer();
+
+          // Note, a repel could run out on the way back to ecruteak. I think this should be okay
+          // because the program goes right back into interrupt mode anyways, so it'll notice it 
+          // right away. I'll probably have to put this block above the repel detection one so that it'll notice
+          // should I make it just if and not else if to avoid this issue?
+          returnToEcruteak();
+          Serial.println("RESTART_INTERRUPT");
+        }
+      }
       
     }
     route_reset_walk();

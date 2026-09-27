@@ -77,3 +77,44 @@ void returnToEcruteak(){
     }
   }
 }
+
+void roamer_detection(bool &shinyFound, bool& enteiSeen, bool& raikouSeen) {
+  delay(7000);  
+
+  unsigned long waitStart = millis();
+  bool decisionReceived = false;
+
+  while (!decisionReceived && millis() - waitStart < 15000) {
+    if (Serial.available()) {
+      String msg = Serial.readStringUntil('\n');
+      msg.trim();
+      msg.toUpperCase();
+
+      int sepIndex = msg.indexOf('_');
+      if (sepIndex == -1) break;
+
+      String roamer = msg.substring(0, sepIndex);
+      String shinyStatus = msg.substring(sepIndex + 1);
+
+      if (shinyStatus == "SHINY") {
+
+        shinyFound = true;
+        decisionReceived = true;
+
+        if (roamer == "RAIKOU") raikouSeen = true;
+        if (roamer == "ENTEI") enteiSeen = true;
+
+        Serial.println("ARDUINO: SHINY RECEIVED");
+      } else if (shinyStatus == "NORMAL") {
+
+        shinyFound = false;
+        decisionReceived = true;
+
+        if (roamer == "RAIKOU") raikouSeen = true;
+        if (roamer == "ENTEI") enteiSeen = true;
+
+        Serial.println("ARDUINO: NOT SHINY RECEIVED");
+      }
+    }
+  }
+}
