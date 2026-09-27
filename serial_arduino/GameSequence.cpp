@@ -117,3 +117,54 @@ void enter_cavern() {
     delay(0); pressB(7439);
     delay(0); pressUp(759);
 }
+
+void mount_bike(){
+    pressY(200);
+}
+
+void reset_route_hgss(){
+    pressDown(1100);
+    pressUp(1100);
+}
+
+void roamer_cutscene(){
+    delay(2880); pressLeft(125);
+    delay(15173); pressB(109);
+    delay(1303); pressB(77);
+    delay(1345); pressB(108);
+    delay(877); pressB(92);
+    delay(2284); pressB(92);
+    delay(816); pressB(93);
+    delay(1343); pressB(124);
+    delay(880); pressB(93);
+    delay(1237); pressB(123);
+    delay(883); pressB(78);
+}
+
+void use_escape_rope() {
+    delay(200); pressX(93);
+    delay(449); pressUp(123);
+    delay(234); pressUp(92);
+    delay(860); pressA(61);
+    delay(1554); pressA(124);
+    delay(866); pressA(92);
+}
+
+void bike_to_route() {
+    mount_bike();
+    delay(200); pressDown(820);
+    delay(0); pressRight(1170);
+    delay(0); pressDown(2261);
+}
+
+void use_repel_hgss() {
+    delay(2256); pressX(105);
+    delay(402); pressA(154);
+    delay(1381); pressA(138);
+    delay(497); pressA(47);
+    delay(1256); pressA(123);
+    delay(434); pressB(139);
+    delay(2163); pressB(139);
+}
+
+
