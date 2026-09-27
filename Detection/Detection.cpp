@@ -122,10 +122,15 @@ Detection::EVENTS DetectInterrupt(cv::Mat img){
         std::abs(encounterAvg[2] - encounterColor[2])
     );
 
-    cv::rectangle(img, encounterDimensions, (0, 0, 255), 2);
-    cv::rectangle(img, repelDimensions, (0, 0, 255), 2);
+    cv::rectangle(img, encounterDimensions, cv::Scalar(0, 0, 255), 2);
+    cv::rectangle(img, repelDimensions, cv::Scalar(0, 0, 255), 2);
+    
 
     cv::imshow("Detect Interrupt", img);
+
+    if (encounterDiff[0] <= 5 && encounterDiff[1] <= 5 && encounterDiff[2] <= 5){
+        return Detection::EVENTS::ENCOUNTER;
+    }
 
     if (repelDiff[0] == 0 && repelDiff[1] == 0 && repelDiff[2] == 0){
         std::cout << "Repel interrupt detected, Repel diffs"
@@ -133,9 +138,6 @@ Detection::EVENTS DetectInterrupt(cv::Mat img){
         return Detection::EVENTS::REPEL;
     }
 
-    if (encounterDiff[0] <= 5 && encounterDiff[1] <= 5 && encounterDiff[2] <= 5){
-        return Detection::EVENTS::ENCOUNTER;
-    }
 
     return Detection::EVENTS::NO_ACTION;
 }
@@ -206,7 +208,7 @@ bool getFacingDirection(cv::Mat img){
     );
     std::cout << "Current color: " << roiColor << std::endl;
     std::cout << dirResult << std::endl;
-    cv::rectangle(img, roi, (255, 255, 255, 0), 1);
+    cv::rectangle(img, roi, cv::Scalar(255, 255, 255), 1);
     cv::imshow("Get Facing Direction", img);
 
     return dirResult[0] < tolerance || dirResult[1] < tolerance || dirResult[2] < tolerance;

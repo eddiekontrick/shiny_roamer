@@ -56,7 +56,7 @@ void returnToEcruteak(){
       message.toUpperCase();
 
       int sepIndex = message.indexOf('_');
-      if (sepIndex == -1) break;
+      if (sepIndex == -1) continue;
 
       String direction = message.substring(0, sepIndex);
       String tileNumString = message.substring(sepIndex + 1);
@@ -78,8 +78,8 @@ void returnToEcruteak(){
   }
 }
 
-void roamer_detection(bool &shinyFound, bool& enteiSeen, bool& raikouSeen) {
-  delay(7000);  
+bool roamer_detection(bool &shinyFound, bool& enteiSeen, bool& raikouSeen) {
+  delay(3000);  
 
   unsigned long waitStart = millis();
   bool decisionReceived = false;
@@ -117,4 +117,5 @@ void roamer_detection(bool &shinyFound, bool& enteiSeen, bool& raikouSeen) {
       }
     }
   }
+  return decisionReceived;
 }

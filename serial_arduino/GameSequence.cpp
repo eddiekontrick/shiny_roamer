@@ -101,14 +101,15 @@ void diamond_title_sequence() {
 }
 
 void encounter_giratina() {
-    delay(30); pressB(94); Serial.println("Begin Encounter Sequence");
+    delay(30); pressB(94); 
     delay(1848); pressA(108);
     delay(185); pressA(46);
     delay(479); pressA(123);
 }
 
 void hgss_title_sequence(){
-    delay(8800); pressA(78); 
+    delay(500);
+    delay(8800); pressA(78); Serial.println("First press");
     delay(1772); pressA(122); 
     delay(3207); pressA(59); 
 }
@@ -168,6 +169,8 @@ void bike_to_route() {
     delay(1000);
     mount_bike();
     delay(300);
+    use_repel_hgss();
+    delay(300);
 }
 
 void use_repel_hgss() {
@@ -188,3 +191,21 @@ void roamer_setup_sequence(){
     bike_to_route();
 }
 
+void knock_out_raikou() {
+    delay(0); pressA(140);
+    delay(480); pressA(93);
+    delay(546); pressA(109);
+    delay(14256); pressB(108);
+    delay(2195); pressB(124);
+    delay(1726); pressB(126);
+    delay(1555); pressB(76);
+}
+
+void knock_out_entei() {
+    delay(0); pressA(140);
+    delay(154); pressA(110);
+    delay(373); pressA(139);
+    delay(14760); pressB(108);
+    delay(2098); pressB(92);
+    delay(1628); pressB(157);
+}

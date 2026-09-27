@@ -23,5 +23,7 @@ void bike_to_route();
 void use_repel_hgss();
 void roamer_setup_sequence();
 void route_reset_walk();
+void knock_out_raikou();
+void knock_out_entei();
 
 #endif

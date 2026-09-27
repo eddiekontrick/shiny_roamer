@@ -5,7 +5,7 @@
 #include <../Detection/Detection.h>
 
 int main(){
-     // HANDLE WINDOW FUNCTIONALITY
+    // HANDLE WINDOW FUNCTIONALITY
     HWND hwnd = nullptr;
     EnumWindows(WindowHandler::EnumWindowsProc, reinterpret_cast<LPARAM>(&hwnd));
 
@@ -21,7 +21,6 @@ int main(){
 
     // HANDLE SERIAL
     HANDLE serialHandle = nullptr;
-    // store serial connection status through ConnectSerial
     const bool serialConnected = SerialHandler::ConnectSerial(serialHandle);
 
     if (serialConnected){
@@ -32,9 +31,9 @@ int main(){
 
     while (true){
         WindowHandler::GetWindow(hwnd, img);
+
         // GET THE COMMAND FIRST
-        std::string command = "INTERRUPT";
-        if (SerialHandler::MatchCommand(command, serialConnected, serialHandle)){
+        if (SerialHandler::MatchCommand("INTERRUPT", serialConnected, serialHandle)){
             interrupt = true;
         }
 
@@ -42,63 +41,131 @@ int main(){
         if (!interrupt) continue;
 
         switch(Detection::DetectInterrupt(img)) {
-            case Detection::EVENTS::REPEL:
-                // Send repel message to arduino
+            case Detection::EVENTS::REPEL: {
                 if (serialConnected){
                     const std::string response = "REPEL\n";
                     DWORD written = 0;
                     WriteFile(serialHandle, response.c_str(), static_cast<DWORD>(response.size()), &written, nullptr);
-                    std::cout << "Sent reapply repel message, waiting on response." << std::endl;
+                    std::cout << "Sent repel message, waiting on response." << std::endl;
 
-                    // Similar function to while serial.available()
-                    // this waits for the response from arduino saying GET_DIST
-                    // which will trigger the getDistanceFromEcruteak function
-                    std::string command;
-                    while (!SerialHandler::MatchCommand("GET_DIST", serialConnected, serialHandle)){
+                    bool resetSignalled = false;
+                    while (true){
+                        std::string line = SerialHandler::ReadCleanLine(serialConnected, serialHandle);
+
+                        if (line == "GET_DIST") {
+                            std::string directions = Detection::getReturnToEcruteakMessage(img);
+                            DWORD written2 = 0;
+                            WriteFile(serialHandle, directions.c_str(), static_cast<DWORD>(directions.size()), &written2, nullptr);
+                            std::cout << "Message sent: " << directions << std::endl;
+                            break;
+                        }
+                        if (line == "END_INTERRUPT"){
+                            resetSignalled = true;
+                            break;
+                        }
                         if (cv::waitKey(1) == 'q') break;
                     }
 
-                    // Send return to ecruteak message
-                    std::string directions = Detection::getReturnToEcruteakMessage(img);
-                    DWORD written2 = 0;
-                    WriteFile(serialHandle, directions.c_str(), static_cast<DWORD>(directions.size()), &written2, nullptr);
-                    std::cout << "Message sent: " << directions << std::endl;
+                    if (resetSignalled) {
+                        std::cout << "All repels used, standing by" << std::endl;
+                        interrupt = false;
+                        continue;
+                    }
 
-                    // wait for arduino to signal it's ready for interrupt detection again
-                    while (!SerialHandler::MatchCommand("RESTART_INTERRUPT", serialConnected, serialHandle)){
+                    while (!SerialHandler::MatchCommand("RESTART_INTERRUPT", serialConnected, serialHandle)) {
                         if (cv::waitKey(1) == 'q') break;
                     }
                 }
                 break;
-            case Detection::EVENTS::ENCOUNTER:
+            }
+            case Detection::EVENTS::ENCOUNTER: {
                 std::cout << "Encounter Starting! " << std::endl;
 
                 if (serialConnected){
                     const std::string response = "ENCOUNTER\n";
                     DWORD written = 0;
                     WriteFile(serialHandle, response.c_str(), static_cast<DWORD>(response.size()), &written, nullptr);
-                    std::cout << "Sent reapply repel message, waiting on response." << std::endl;
+                    std::cout << "Sent encounter message, waiting for start-detection signal." << std::endl;
 
                     // wait for command to start detection
-                    std::string detectReady = "START_DETECTION";
+                    while (!SerialHandler::MatchCommand("START_DETECTION", serialConnected, serialHandle)) {
+                        if (cv::waitKey(1) == 'q') break;
+                    }
 
-                    // First - Get the roamer and store it's name
+                    // Recapture: img at the top of the outer loop is stale by now
+                    WindowHandler::GetWindow(hwnd, img);
+
+                    // First - Get the roamer and store its name
                     Detection::ROAMER currRoamer = Detection::identifyRoamer(img);
-                    std::string currRoamerName = currRoamer == Detection::ROAMER::RAIKOU ? "RAIKOU" : currRoamer == Detection::ROAMER::ENTEI ? "ENTEI" : "ROAMER_ERROR";
-                    
+                    std::string currRoamerName = currRoamer == Detection::ROAMER::RAIKOU ? "RAIKOU" :
+                                                  currRoamer == Detection::ROAMER::ENTEI ? "ENTEI" : "ROAMER_ERROR";
+
                     // Second - Decide if it is shiny
                     bool isShiny = Detection::DetectShinyRoamer(currRoamer, img);
                     std::string shinyStatus = isShiny ? "SHINY\n" : "NORMAL\n";
 
-
                     const std::string decision = currRoamerName + "_" + shinyStatus;
-                    DWORD written = 0;
-                    WriteFile(serialHandle, decision.c_str(), static_cast<DWORD>(response.size()), &written, nullptr);
-                    std::cout << "Sent reapply repel message, waiting on response." << std::endl;
+                    DWORD written2 = 0;
+                    WriteFile(serialHandle, decision.c_str(), static_cast<DWORD>(decision.size()), &written2, nullptr);
+                    std::cout << "Sent shiny decision, waiting on response." << std::endl;
 
+                    bool resetSignalled = false;
+                    bool shinyFound = false;
+                    while (true){
+                        if (!IsWindow(hwnd)) {
+                            std::cerr << "Window " << WindowHandler::kWindowName << " lost. Waiting to reacquire..." << std::endl;
+                            hwnd = nullptr;
+
+                            while (!hwnd) {
+                                EnumWindows(WindowHandler::EnumWindowsProc, reinterpret_cast<LPARAM>(&hwnd));
+                                if (!hwnd) {
+                                    if (cv::waitKey(500) == 'q') {
+                                        if (serialConnected) CloseHandle(serialHandle);
+                                        return 0;
+                                    }
+                                }
+                            }
+
+                            std::cout << "Window reacquired." << std::endl;
+                        }
+
+                        WindowHandler::GetWindow(hwnd, img);
+                        std::string line = SerialHandler::ReadCleanLine(serialConnected, serialHandle);
+
+                        if (line == "GET_DIST") {
+                            std::string directions = Detection::getReturnToEcruteakMessage(img);
+                            DWORD written3 = 0;
+                            WriteFile(serialHandle, directions.c_str(), static_cast<DWORD>(directions.size()), &written3, nullptr);
+                            std::cout << "Message sent: " << directions << std::endl;
+                            break;
+                        }
+                        if (line == "END_INTERRUPT"){
+                            resetSignalled = true;
+                            break;
+                        }
+                        if (line == "SHINY_FOUND"){
+                            shinyFound = true;
+                            break;
+                        }
+                        if (cv::waitKey(1) == 'q') break;
+                    }
+
+                    if (shinyFound) {
+                        std::cout << "SHINY FOUND! Stopping." << std::endl;
+                        return 0;
+                    }
+
+                    if (resetSignalled) {
+                        interrupt = false;
+                        continue;
+                    }
+
+                    while (!SerialHandler::MatchCommand("RESTART_INTERRUPT", serialConnected, serialHandle)) {
+                        if (cv::waitKey(1) == 'q') break;
+                    }
                 }
-
                 break;
+            }
             case Detection::EVENTS::NO_ACTION:
                 break;
         }
@@ -106,9 +173,11 @@ int main(){
         if (cv::waitKey(1) == 'q') {  // 27 = Esc key, gives you a clean exit
             break;
         }
-        
     }
 
+    if (serialConnected) {
+        CloseHandle(serialHandle);
+    }
+
+    return 0;
 }
-
-
