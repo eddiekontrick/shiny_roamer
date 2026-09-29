@@ -57,10 +57,17 @@ void returnToEcruteak(){
 
       int sepIndex = message.indexOf('_');
       if (sepIndex == -1) continue;
+      
 
       String direction = message.substring(0, sepIndex);
       String tileNumString = message.substring(sepIndex + 1);
       int currTile = tileNumString.toInt();
+
+      if (currTile == -1){
+        Serial.println("LOST_RECOVERY_TRIGGERED");
+        return_from_lost();
+        break;
+      }
 
       for (Tiles tile : tiles) {
         if (tile.tileNum == currTile) {

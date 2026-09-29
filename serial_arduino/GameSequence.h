@@ -25,5 +25,6 @@ void roamer_setup_sequence();
 void route_reset_walk();
 void knock_out_raikou();
 void knock_out_entei();
+void return_from_lost();
 
 #endif

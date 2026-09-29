@@ -174,13 +174,14 @@ void bike_to_route() {
 }
 
 void use_repel_hgss() {
-    delay(0); pressX(105);
+    Serial.println("Using repel");
+    delay(0); pressX(105); Serial.println("Open bag");
     delay(402); pressA(154);
     delay(1381); pressA(138);
     delay(497); pressA(47);
     delay(1256); pressA(123);
     delay(434); pressB(139);
-    delay(2163); pressB(139);
+    delay(2163); pressB(139); Serial.println("Close bag");
 }
 
 void roamer_setup_sequence(){
@@ -205,7 +206,15 @@ void knock_out_entei() {
     delay(0); pressA(140);
     delay(154); pressA(110);
     delay(373); pressA(139);
-    delay(14760); pressB(108);
+    delay(10000); pressB(108); Serial.println("Exit battle first press");
     delay(2098); pressB(92);
     delay(1628); pressB(157);
+}
+
+void return_from_lost() {
+    mount_bike();
+    delay(300); pressDown(2740);
+    delay(500); pressY(125);
+    delay(300); pressUp(2240);
+    delay(300); pressDown(62);
 }

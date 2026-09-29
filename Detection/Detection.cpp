@@ -86,7 +86,8 @@ Detection::EVENTS DetectInterrupt(cv::Mat img){
     cv::Rect encounterDimensions(120, 360, 10, 10);
     cv::Rect repelDimensions(244, 162, 5, 5);
 
-    cv::Vec3i encounterColor(255, 255, 255);
+    cv::Vec3i encounterColor1(255, 255, 255);
+    cv::Vec3i encounterColor2(0, 0, 0);
     cv::Vec3i repelColor(251, 251, 203);
 
     cv::Mat repelRoi = img(repelDimensions);
@@ -116,10 +117,16 @@ Detection::EVENTS DetectInterrupt(cv::Mat img){
         std::abs(repelAvg[2] - repelColor[2])
     );
 
-    cv::Vec3i encounterDiff(
-        std::abs(encounterAvg[0] - encounterColor[0]),
-        std::abs(encounterAvg[1] - encounterColor[1]),
-        std::abs(encounterAvg[2] - encounterColor[2])
+    cv::Vec3i encounterDiff1(
+        std::abs(encounterAvg[0] - encounterColor1[0]),
+        std::abs(encounterAvg[1] - encounterColor1[1]),
+        std::abs(encounterAvg[2] - encounterColor1[2])
+    );
+
+    cv::Vec3i encounterDiff2(
+        std::abs(encounterAvg[0] - encounterColor2[0]),
+        std::abs(encounterAvg[1] - encounterColor2[1]),
+        std::abs(encounterAvg[2] - encounterColor2[2])
     );
 
     cv::rectangle(img, encounterDimensions, cv::Scalar(0, 0, 255), 2);
@@ -128,7 +135,11 @@ Detection::EVENTS DetectInterrupt(cv::Mat img){
 
     cv::imshow("Detect Interrupt", img);
 
-    if (encounterDiff[0] <= 5 && encounterDiff[1] <= 5 && encounterDiff[2] <= 5){
+    if ((encounterDiff1[0] <= 5 && encounterDiff1[1] <= 5 && encounterDiff1[2] <= 5) 
+        || (encounterDiff2[0] <= 5 && encounterDiff2[1] <= 5 && encounterDiff2[2] <= 5)){
+        std::cout << "Encounter interrupt detected, Encounter diffs: " <<
+            encounterDiff1[0]<<  encounterDiff1[0] <<  encounterDiff1[0] <<
+            encounterDiff2[0]<<  encounterDiff2[0] <<  encounterDiff2[0] << std::endl;
         return Detection::EVENTS::ENCOUNTER;
     }
 
@@ -170,8 +181,8 @@ int getDistanceFromEcruteak(cv::Mat img){
     cv::Point matchLoc = maxLoc;
 
     cv::Point bottomRight(matchLoc.x + tree_reference.cols, matchLoc.y + tree_reference.rows);
-    cv::rectangle(thresholded, matchLoc, bottomRight, cv::Scalar(0, 255, 0), 2);
-    cv::imshow("BINARY", thresholded); 
+    // cv::rectangle(thresholded, matchLoc, bottomRight, cv::Scalar(0, 255, 0), 2);
+    // cv::imshow("BINARY", thresholded); 
 
     // formula for telling distance from gate (to reset route)
     int distance = 90 - bottomRight.y + 58;
@@ -208,15 +219,15 @@ bool getFacingDirection(cv::Mat img){
     );
     std::cout << "Current color: " << roiColor << std::endl;
     std::cout << dirResult << std::endl;
-    cv::rectangle(img, roi, cv::Scalar(255, 255, 255), 1);
-    cv::imshow("Get Facing Direction", img);
+    // cv::rectangle(img, roi, cv::Scalar(255, 255, 255), 1);
+    // cv::imshow("Get Facing Direction", img);
 
     return dirResult[0] < tolerance || dirResult[1] < tolerance || dirResult[2] < tolerance;
 }
 
 std::string getReturnToEcruteakMessage(cv::Mat img){
     int tile = Detection::getDistanceFromEcruteak(img);
-    std::string direction = Detection::getFacingDirection(img) ? "BACKWARD" : "FORWARD";
+    std::string direction = Detection::getFacingDirection(img) ? "FORWARD" : "BACKWARD";
 
     return direction + "_" + std::to_string(tile);
 }
@@ -267,8 +278,8 @@ ROAMER identifyRoamer(cv::Mat img){
     cv::Point matchLoc = maxLoc;
     cv::Point bottomRight(matchLoc.x + roamer_reference.cols, matchLoc.y + roamer_reference.rows);
     
-    cv::rectangle(thresh_img, matchLoc, bottomRight, cv::Scalar(0, 255, 0), 2);
-    cv::imshow("BINARY", thresh_img); 
+    // cv::rectangle(thresh_img, matchLoc, bottomRight, cv::Scalar(0, 255, 0), 2);
+    // cv::imshow("BINARY", thresh_img); 
 
     const double matchThreshold = 0.7;
 

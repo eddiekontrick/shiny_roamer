@@ -75,6 +75,8 @@ int main(){
                     while (!SerialHandler::MatchCommand("RESTART_INTERRUPT", serialConnected, serialHandle)) {
                         if (cv::waitKey(1) == 'q') break;
                     }
+                    WindowHandler::GetWindow(hwnd, img);
+                    cv::imwrite("last_repel_result.png", img);
                 }
                 break;
             }
@@ -139,6 +141,7 @@ int main(){
                             std::cout << "Message sent: " << directions << std::endl;
                             break;
                         }
+                        // CHECK FOR REPEL IMMEDIATELY AFTER THIS
                         if (line == "END_INTERRUPT"){
                             resetSignalled = true;
                             break;

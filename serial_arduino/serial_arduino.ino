@@ -65,7 +65,10 @@ void loop() {
         delay(10000);
         Serial.println("START_DETECTION");
         bool decisionReceived = roamer_detection(shinyFound, enteiSeen, raikouSeen);
-
+        counter++;
+        Serial.println("Encounters: ");
+        Serial.println(counter);
+        
         if (shinyFound){
           setLed(true);
           Serial.println("SHINY_FOUND");
@@ -104,35 +107,3 @@ void loop() {
     route_reset_walk();
   }
 }
-  /*
-  while (Serial.available() > 0) {
-    String cmd = Serial.readStringUntil('\n');
-    handleSerialCommand(cmd);
-  }
-
-  counter++;
-
-  if (!shinyFound) {
-    diamond_title_sequence();
-    delay(1500);
-    encounter_giratina();
-    detection_ready(shinyFound);
-
-    if (!shinyFound) {
-      pressResetDS(200);
-    }
-  }
-
-  Serial.print("Number of encounters: ");
-  Serial.println(counter);
-
-  if (shinyFound) {
-    while (true) {
-      setLed(true);
-      delay(250);
-      setLed(false);
-      delay(250);
-    }
-  }
-  */
-// }
