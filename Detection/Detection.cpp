@@ -8,10 +8,6 @@ namespace Detection{
 namespace {
 cv::Mat tree_reference;
 cv::Mat roamer_reference;
-cv::Mat raikou_normal;
-cv::Mat raikou_shiny;
-cv::Mat entei_normal;
-cv::Mat entei_shiny;
 
 std::filesystem::path GetExecutableDirectory() {
     std::wstring buffer(MAX_PATH, L'\0');
@@ -47,11 +43,7 @@ bool Initialize() {
     };
 
     if (!loadImage(tree_reference, "tree_reference.png") ||
-        !loadImage(roamer_reference, "roamer_reference.png") ||
-        !loadImage(raikou_normal, "raikou_normal.png") ||
-        !loadImage(raikou_shiny, "raikou_shiny.png") ||
-        !loadImage(entei_normal, "entei_normal.png") ||
-        !loadImage(entei_shiny, "entei_shiny.png")) {
+        !loadImage(roamer_reference, "roamer_reference.png")) {
         return false;
     }
 
@@ -86,7 +78,8 @@ Detection::EVENTS DetectInterrupt(cv::Mat img){
     cv::Rect encounterDimensions(120, 360, 10, 10);
     cv::Rect repelDimensions(244, 162, 5, 5);
 
-    cv::Vec3i encounterColor(255, 255, 255);
+    cv::Vec3i encounterColor1(255, 255, 255);
+    cv::Vec3i encounterColor2(0, 0, 0);
     cv::Vec3i repelColor(251, 251, 203);
 
     cv::Mat repelRoi = img(repelDimensions);
@@ -116,24 +109,38 @@ Detection::EVENTS DetectInterrupt(cv::Mat img){
         std::abs(repelAvg[2] - repelColor[2])
     );
 
-    cv::Vec3i encounterDiff(
-        std::abs(encounterAvg[0] - encounterColor[0]),
-        std::abs(encounterAvg[1] - encounterColor[1]),
-        std::abs(encounterAvg[2] - encounterColor[2])
+    cv::Vec3i encounterDiff1(
+        std::abs(encounterAvg[0] - encounterColor1[0]),
+        std::abs(encounterAvg[1] - encounterColor1[1]),
+        std::abs(encounterAvg[2] - encounterColor1[2])
     );
 
-    cv::rectangle(img, encounterDimensions, (0, 0, 255), 2);
-    cv::rectangle(img, repelDimensions, (0, 0, 255), 2);
+    cv::Vec3i encounterDiff2(
+        std::abs(encounterAvg[0] - encounterColor2[0]),
+        std::abs(encounterAvg[1] - encounterColor2[1]),
+        std::abs(encounterAvg[2] - encounterColor2[2])
+    );
+
+    cv::rectangle(img, encounterDimensions, cv::Scalar(0, 0, 255), 2);
+    cv::rectangle(img, repelDimensions, cv::Scalar(0, 0, 255), 2);
+    
 
     cv::imshow("Detect Interrupt", img);
 
+    if ((encounterDiff1[0] <= 5 && encounterDiff1[1] <= 5 && encounterDiff1[2] <= 5) 
+        || (encounterDiff2[0] <= 5 && encounterDiff2[1] <= 5 && encounterDiff2[2] <= 5)){
+        std::cout << "Encounter interrupt detected, Encounter diffs: " <<
+            encounterDiff1[0]<<  encounterDiff1[0] <<  encounterDiff1[0] <<
+            encounterDiff2[0]<<  encounterDiff2[0] <<  encounterDiff2[0] << std::endl;
+        return Detection::EVENTS::ENCOUNTER;
+    }
+
     if (repelDiff[0] == 0 && repelDiff[1] == 0 && repelDiff[2] == 0){
+        std::cout << "Repel interrupt detected, Repel diffs"
+            << repelDiff[0] << repelDiff[1] << repelDiff[2];
         return Detection::EVENTS::REPEL;
     }
 
-    if (encounterDiff[0] <= 5 && encounterDiff[1] <= 5 && encounterDiff[2] <= 5){
-        return Detection::EVENTS::ENCOUNTER;
-    }
 
     return Detection::EVENTS::NO_ACTION;
 }
@@ -142,6 +149,8 @@ int getDistanceFromEcruteak(cv::Mat img){
     // Partition out the other trees on the right side of the screen:
     // we are using the treeline on the left as a reference to where we
     // are in relation to the gate
+    int distThreshold = 5;
+
     cv::Rect thresholdRoi(0, 0, 150, 200);
     cv::Mat imgPartition = img(thresholdRoi);
 
@@ -164,24 +173,26 @@ int getDistanceFromEcruteak(cv::Mat img){
     cv::Point matchLoc = maxLoc;
 
     cv::Point bottomRight(matchLoc.x + tree_reference.cols, matchLoc.y + tree_reference.rows);
-    cv::rectangle(thresholded, matchLoc, bottomRight, cv::Scalar(0, 255, 0), 2);
-    cv::imshow("BINARY", thresholded); 
+    // cv::rectangle(thresholded, matchLoc, bottomRight, cv::Scalar(0, 255, 0), 2);
+    // cv::imshow("BINARY", thresholded); 
 
     // formula for telling distance from gate (to reset route)
     int distance = 90 - bottomRight.y + 58;
-    auto it = tiles.find(distance);
     std::cout << "Distance: " << distance << std::endl;
-    if (it != tiles.end())
-        std::cout << "In tile: " << it->second << std::endl;
-    else
-        std::cout << "value not found " << std::endl;
 
-    return it->second;
+    int tile = -1;
+    if (FindTileWithPadding(distance, 3, tile)) {
+        std::cout << "In tile: " << tile << std::endl;
+    } else {
+        std::cout << "value not found" << std::endl;
+    }
+
+    return tile;
 }
 
 bool getFacingDirection(cv::Mat img){
     int tolerance = 30;
-    cv::Rect roi(128, 89, 1, 1);
+    cv::Rect roi(126, 85, 1, 1);
     cv::Mat dirRoi = img(roi);
     cv::Scalar roiMean = cv::mean(dirRoi);
 
@@ -191,24 +202,24 @@ bool getFacingDirection(cv::Mat img){
         static_cast<int>(roiMean[2])
     );
 
-    cv::Vec3i forwardColor(190, 207, 239);
+    cv::Vec3i forwardColor(32, 113, 178);
 
     cv::Vec3i dirResult(
         cv::abs(roiColor[0] - forwardColor[0]),
         cv::abs(roiColor[1] - forwardColor[1]),
         cv::abs(roiColor[2] - forwardColor[2])
     );
-
+    std::cout << "Current color: " << roiColor << std::endl;
     std::cout << dirResult << std::endl;
-    cv::rectangle(img, roi, (0, 0, 0, 0), 4);
-    cv::imshow("Get Facing Direction", img);
+    // cv::rectangle(img, roi, cv::Scalar(255, 255, 255), 1);
+    // cv::imshow("Get Facing Direction", img);
 
     return dirResult[0] < tolerance || dirResult[1] < tolerance || dirResult[2] < tolerance;
 }
 
 std::string getReturnToEcruteakMessage(cv::Mat img){
     int tile = Detection::getDistanceFromEcruteak(img);
-    std::string direction = Detection::getFacingDirection(img) ? "BACKWARD" : "FORWARD";
+    std::string direction = Detection::getFacingDirection(img) ? "FORWARD" : "BACKWARD";
 
     return direction + "_" + std::to_string(tile);
 }
@@ -247,7 +258,7 @@ ROAMER identifyRoamer(cv::Mat img){
     }
 
     cv::Mat thresh_img;
-    cv::threshold(gray_img, thresh_img, 100, 255, cv::THRESH_BINARY);
+    cv::threshold(gray_img, thresh_img, 110, 255, cv::THRESH_BINARY);
 
     cv::Mat result;
     cv::matchTemplate(thresh_img, thresh_roamer_ref, result, cv::TM_CCOEFF_NORMED);
@@ -259,13 +270,14 @@ ROAMER identifyRoamer(cv::Mat img){
     cv::Point matchLoc = maxLoc;
     cv::Point bottomRight(matchLoc.x + roamer_reference.cols, matchLoc.y + roamer_reference.rows);
     
-    cv::rectangle(thresh_img, matchLoc, bottomRight, cv::Scalar(0, 255, 0), 2);
-    cv::imshow("BINARY", thresh_img); 
+    // cv::rectangle(thresh_img, matchLoc, bottomRight, cv::Scalar(0, 255, 0), 2);
+    // cv::imshow("BINARY", thresh_img); 
 
     const double matchThreshold = 0.7;
 
     std::string message = maxVal > matchThreshold ? "Raikou Detected." : "Entei Detected";
     std::cout << message << std::endl;
+    std::cout << "Threshold best match: " << maxVal << std::endl;
     return maxVal > matchThreshold ? RAIKOU : ENTEI;
 }
 
@@ -285,6 +297,23 @@ bool DetectShinyRoamer(ROAMER roamer, cv::Mat img){
         default:
             return false;
     }
+}
+
+// Looks up `distance` in `tiles`, tolerating +/- padding pixels of drift.
+// Returns true and sets outTile to the matched tile if found.
+bool FindTileWithPadding(int distance, int padding, int& outTile) {
+    int bestOffset = padding + 1; // sentinel: worse than any valid match
+    bool found = false;
+
+    for (int offset = -padding; offset <= padding; ++offset) {
+        auto it = tiles.find(distance + offset);
+        if (it != tiles.end() && std::abs(offset) < bestOffset) {
+            bestOffset = std::abs(offset);
+            outTile = it->second;
+            found = true;
+        }
+    }
+    return found;
 }
 
 }

@@ -107,4 +107,21 @@ bool WriteSerialChar(HANDLE serialHandle, char ch){
     return true;
 }
 
+bool MatchCommand(const std::string& expected, bool serialConnected, HANDLE serialHandle){
+    return ReadCleanLine(serialConnected, serialHandle) == expected;
+}
+
+std::string ReadCleanLine(bool serialConnected, HANDLE serialHandle){
+    std::string message;
+    if (!serialConnected) return "";
+    if (!SerialHandler::ReadSerialLine(serialHandle, message)) return "";
+
+    std::string clean = message;
+    clean.erase(clean.begin(), std::find_if(clean.begin(), clean.end(), [](unsigned char ch) { return !std::isspace(ch); }));
+    clean.erase(std::find_if(clean.rbegin(), clean.rend(), [](unsigned char ch) { return !std::isspace(ch); }).base(), clean.end());
+
+    if (!clean.empty()) std::cout << "Received: " << clean << std::endl;
+    return clean;
+}
+
 }

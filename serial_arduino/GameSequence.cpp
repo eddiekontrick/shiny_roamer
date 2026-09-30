@@ -101,10 +101,17 @@ void diamond_title_sequence() {
 }
 
 void encounter_giratina() {
-    delay(30); pressB(94); Serial.println("Begin Encounter Sequence");
+    delay(30); pressB(94); 
     delay(1848); pressA(108);
     delay(185); pressA(46);
     delay(479); pressA(123);
+}
+
+void hgss_title_sequence(){
+    delay(500);
+    delay(8800); pressA(78); Serial.println("First press");
+    delay(1772); pressA(122); 
+    delay(3207); pressA(59); 
 }
 
 void enter_cavern() {
@@ -122,14 +129,17 @@ void mount_bike(){
     pressY(200);
 }
 
-void reset_route_hgss(){
-    pressDown(1100);
-    pressUp(1100);
+void route_reset_walk(){
+    pressDown(1650);
+    pressUp(1700);
+    delay(400);
+    pressDown(50);
+    delay(200);
 }
 
 void roamer_cutscene(){
-    delay(2880); pressLeft(125);
-    delay(15173); pressB(109);
+    delay(2800); pressLeft(125); 
+    delay(14900); pressB(109); 
     delay(1303); pressB(77);
     delay(1345); pressB(108);
     delay(877); pressB(92);
@@ -138,33 +148,78 @@ void roamer_cutscene(){
     delay(1343); pressB(124);
     delay(880); pressB(93);
     delay(1237); pressB(123);
-    delay(883); pressB(78);
+    delay(883); pressB(78); 
+    delay(2000); 
 }
 
 void use_escape_rope() {
-    delay(200); pressX(93);
+    delay(200); pressX(93); 
     delay(449); pressUp(123);
     delay(234); pressUp(92);
-    delay(860); pressA(61);
+    delay(500); pressA(61); 
     delay(1554); pressA(124);
-    delay(866); pressA(92);
+    delay(866); pressA(92); 
 }
 
 void bike_to_route() {
+    mount_bike(); Serial.print("Mount bike");
+    delay(200); pressDown(700);
+    delay(0); pressRight(980);
+    delay(0); pressDown(2160);
+    delay(1000);
     mount_bike();
-    delay(200); pressDown(820);
-    delay(0); pressRight(1170);
-    delay(0); pressDown(2261);
+    delay(300);
+    use_repel_hgss();
+    delay(300);
 }
 
 void use_repel_hgss() {
-    delay(2256); pressX(105);
+    Serial.println("Using repel");
+    pressB(100); Serial.println("Close text box");
+    delay(100);
+    pressB(100);
+    delay(200); pressX(105); Serial.println("Open bag");
     delay(402); pressA(154);
     delay(1381); pressA(138);
     delay(497); pressA(47);
     delay(1256); pressA(123);
     delay(434); pressB(139);
-    delay(2163); pressB(139);
+    delay(2163); pressB(139); Serial.println("Close bag");
 }
 
+void roamer_setup_sequence(){
+    hgss_title_sequence();
+    roamer_cutscene(); 
+    use_escape_rope();
+    delay(12000); 
+    bike_to_route();
+}
 
+void knock_out_raikou() {
+    delay(400);
+    delay(0); pressA(140);
+    delay(480); pressA(93);
+    delay(546); pressA(109);
+    delay(14256); pressB(108);
+    delay(2195); pressB(124);
+    delay(1726); pressB(126);
+    delay(1555); pressB(76);
+}
+
+void knock_out_entei() {
+    delay(600);
+    delay(0); pressA(140);
+    delay(154); pressA(110);
+    delay(373); pressA(139);
+    delay(10000); pressB(108); Serial.println("Exit battle first press");
+    delay(2098); pressB(92);
+    delay(1628); pressB(157);
+}
+
+void return_from_lost() {
+    mount_bike();
+    delay(300); pressDown(2740);
+    delay(500); pressY(125);
+    delay(300); pressUp(2240);
+    delay(300); pressDown(62);
+}
