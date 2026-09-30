@@ -30,7 +30,9 @@ void loop() {
   int repelCount = 0;
   bool raikouSeen = false;
   bool enteiSeen = false;
+  bool repelEdgeCase = false;
 
+  Serial.println("\nNEW ENCOUNTER-------");
   roamer_setup_sequence();
 
   // Enter interrupt detection mode

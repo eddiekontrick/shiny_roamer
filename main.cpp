@@ -76,7 +76,6 @@ int main(){
                         if (cv::waitKey(1) == 'q') break;
                     }
                     WindowHandler::GetWindow(hwnd, img);
-                    cv::imwrite("last_repel_result.png", img);
                 }
                 break;
             }

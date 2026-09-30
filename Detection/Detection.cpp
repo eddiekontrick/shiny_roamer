@@ -8,10 +8,6 @@ namespace Detection{
 namespace {
 cv::Mat tree_reference;
 cv::Mat roamer_reference;
-cv::Mat raikou_normal;
-cv::Mat raikou_shiny;
-cv::Mat entei_normal;
-cv::Mat entei_shiny;
 
 std::filesystem::path GetExecutableDirectory() {
     std::wstring buffer(MAX_PATH, L'\0');
@@ -47,11 +43,7 @@ bool Initialize() {
     };
 
     if (!loadImage(tree_reference, "tree_reference.png") ||
-        !loadImage(roamer_reference, "roamer_reference.png") ||
-        !loadImage(raikou_normal, "raikou_normal.png") ||
-        !loadImage(raikou_shiny, "raikou_shiny.png") ||
-        !loadImage(entei_normal, "entei_normal.png") ||
-        !loadImage(entei_shiny, "entei_shiny.png")) {
+        !loadImage(roamer_reference, "roamer_reference.png")) {
         return false;
     }
 
@@ -266,7 +258,7 @@ ROAMER identifyRoamer(cv::Mat img){
     }
 
     cv::Mat thresh_img;
-    cv::threshold(gray_img, thresh_img, 100, 255, cv::THRESH_BINARY);
+    cv::threshold(gray_img, thresh_img, 110, 255, cv::THRESH_BINARY);
 
     cv::Mat result;
     cv::matchTemplate(thresh_img, thresh_roamer_ref, result, cv::TM_CCOEFF_NORMED);
@@ -285,6 +277,7 @@ ROAMER identifyRoamer(cv::Mat img){
 
     std::string message = maxVal > matchThreshold ? "Raikou Detected." : "Entei Detected";
     std::cout << message << std::endl;
+    std::cout << "Threshold best match: " << maxVal << std::endl;
     return maxVal > matchThreshold ? RAIKOU : ENTEI;
 }
 

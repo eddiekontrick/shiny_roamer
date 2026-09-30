@@ -175,7 +175,10 @@ void bike_to_route() {
 
 void use_repel_hgss() {
     Serial.println("Using repel");
-    delay(0); pressX(105); Serial.println("Open bag");
+    pressB(100); Serial.println("Close text box");
+    delay(100);
+    pressB(100);
+    delay(200); pressX(105); Serial.println("Open bag");
     delay(402); pressA(154);
     delay(1381); pressA(138);
     delay(497); pressA(47);
@@ -193,6 +196,7 @@ void roamer_setup_sequence(){
 }
 
 void knock_out_raikou() {
+    delay(400);
     delay(0); pressA(140);
     delay(480); pressA(93);
     delay(546); pressA(109);
@@ -203,6 +207,7 @@ void knock_out_raikou() {
 }
 
 void knock_out_entei() {
+    delay(600);
     delay(0); pressA(140);
     delay(154); pressA(110);
     delay(373); pressA(139);
